@@ -1,13 +1,12 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from './TopBar';
 import ReadingArea from './ReadingArea';
 import BottomPanel from './BottomPanel';
-import NavigationPanel from './NavigationPanel';
-import SideNotesPanel from './SideNotesPanel';
+import DesktopSidebar from './DesktopSidebar';
+import MobileDrawer from './MobileDrawer';
 import type { Note } from './NotesPanel';
 import type { BookmarkEntry } from './NavigationPanel';
-import { useEdgeSwipe } from '@/hooks/use-swipe';
 
 const PARAGRAPHS = [
   `When you think of a mental image of a friend, that image comes to mind effortlessly and without intention. You did not will it into being and you could not prevent it. It was an act of System 1. The operations of associative memory contribute to a general confirmation bias, which favors uncritical acceptance of suggestions and exaggeration of the likelihood of extreme and improbable events.`,
@@ -21,18 +20,19 @@ const PARAGRAPHS = [
 ];
 
 const HIGHLIGHTS = [
-  {
-    id: 'h1',
-    text: 'familiarity is not easily distinguished from truth',
-    paragraphIndex: 1,
-    startOffset: 0,
-  },
-  {
-    id: 'h2',
-    text: 'what we see is all there is',
-    paragraphIndex: 5,
-    startOffset: 0,
-  },
+  { id: 'h1', text: 'familiarity is not easily distinguished from truth', paragraphIndex: 1, startOffset: 0 },
+  { id: 'h2', text: 'what we see is all there is', paragraphIndex: 5, startOffset: 0 },
+];
+
+const CHAPTER_NAMES = [
+  'The Characters of the Story',
+  'Attention and Effort',
+  'The Lazy Controller',
+  'The Associative Machine',
+  'Cognitive Ease',
+  'Norms, Surprises, and Causes',
+  'A Machine for Jumping to Conclusions',
+  'How Judgments Happen',
 ];
 
 const ReaderScreen = () => {
@@ -45,39 +45,23 @@ const ReaderScreen = () => {
   const [fontFamily, setFontFamily] = useState('Lora');
   const [fontSize, setFontSize] = useState(18);
   const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('light');
-  const [navOpen, setNavOpen] = useState(false);
-  const [notesOpen, setNotesOpen] = useState(false);
   const [activeChapter, setActiveChapter] = useState(3);
   const [bookmarks, setBookmarks] = useState<BookmarkEntry[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
   const lastScrollTopRef = useRef(0);
 
-  // Mobile swipe gestures
-  useEdgeSwipe({
-    elementRef: wrapperRef,
-    edge: 'left',
-    isOpen: navOpen,
-    onSwipeOpen: () => setNavOpen(true),
-    onSwipeClose: () => setNavOpen(false),
-  });
-
-  useEdgeSwipe({
-    elementRef: wrapperRef,
-    edge: 'right',
-    isOpen: notesOpen,
-    onSwipeOpen: () => setNotesOpen(true),
-    onSwipeClose: () => setNotesOpen(false),
-  });
+  // Check if current chapter is bookmarked
+  const isCurrentChapterBookmarked = useMemo(
+    () => bookmarks.some((b) => b.chapter === CHAPTER_NAMES[activeChapter]),
+    [bookmarks, activeChapter],
+  );
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
     const scrollTop = el.scrollTop;
     const scrollHeight = el.scrollHeight - el.clientHeight;
-    if (scrollHeight > 0) {
-      setProgress((scrollTop / scrollHeight) * 100);
-    }
+    if (scrollHeight > 0) setProgress((scrollTop / scrollHeight) * 100);
 
     if (Math.abs(scrollTop - lastScrollTopRef.current) > 5) {
       setBarVisible(false);
@@ -124,30 +108,21 @@ const ReaderScreen = () => {
     setActivePanel(panel);
   }, []);
 
-  const chapterNames = [
-    'The Characters of the Story',
-    'Attention and Effort',
-    'The Lazy Controller',
-    'The Associative Machine',
-    'Cognitive Ease',
-    'Norms, Surprises, and Causes',
-    'A Machine for Jumping to Conclusions',
-    'How Judgments Happen',
-  ];
-
-  const handleBookmark = useCallback(() => {
-    const el = scrollRef.current;
-    const excerpt = el
-      ? PARAGRAPHS[Math.min(Math.floor((progress / 100) * PARAGRAPHS.length), PARAGRAPHS.length - 1)].slice(0, 80) + '…'
-      : '';
-
-    const entry: BookmarkEntry = {
-      id: Date.now().toString(),
-      chapter: chapterNames[activeChapter],
-      excerpt,
-    };
-    setBookmarks((prev) => [entry, ...prev]);
-  }, [progress, activeChapter]);
+  const handleBookmarkToggle = useCallback(() => {
+    const chapterName = CHAPTER_NAMES[activeChapter];
+    const existing = bookmarks.find((b) => b.chapter === chapterName);
+    if (existing) {
+      setBookmarks((prev) => prev.filter((b) => b.id !== existing.id));
+    } else {
+      const excerpt = PARAGRAPHS[
+        Math.min(Math.floor((progress / 100) * PARAGRAPHS.length), PARAGRAPHS.length - 1)
+      ].slice(0, 80) + '…';
+      setBookmarks((prev) => [
+        { id: Date.now().toString(), chapter: chapterName, excerpt },
+        ...prev,
+      ]);
+    }
+  }, [progress, activeChapter, bookmarks]);
 
   const handleRemoveBookmark = useCallback((id: string) => {
     setBookmarks((prev) => prev.filter((b) => b.id !== id));
@@ -159,66 +134,21 @@ const ReaderScreen = () => {
   }, []);
 
   return (
-    <div ref={wrapperRef} className="h-screen flex flex-col overflow-hidden bg-reader-bg">
-      <NavigationPanel
-        isOpen={navOpen}
-        onToggle={() => setNavOpen((p) => !p)}
-        activeChapterIndex={activeChapter}
-        onChapterSelect={handleChapterSelect}
-        bookmarks={bookmarks}
-        onRemoveBookmark={handleRemoveBookmark}
-      />
-      <SideNotesPanel
-        isOpen={notesOpen}
-        onToggle={() => setNotesOpen((p) => !p)}
-        activeChapter={activeChapter}
-      />
+    <div className="h-screen flex flex-col overflow-hidden bg-reader-bg">
       <TopBar
         title="Thinking, Fast and Slow"
         progress={progress}
         onBack={() => navigate('/')}
-        onMenuOpen={() => setNavOpen((p) => !p)}
-        onBookmark={handleBookmark}
+        onBookmark={handleBookmarkToggle}
+        isBookmarked={isCurrentChapterBookmarked}
       />
 
-      {/* Reading area — pushed by panels on desktop */}
-      <div
-        className="flex-1 overflow-y-auto transition-[margin] duration-300 ease-out"
-        ref={scrollRef}
-        onClick={handleReadingAreaTap}
-        style={{
-          marginLeft: undefined,
-          marginRight: undefined,
-        }}
-      >
-        {/* Desktop margin push via CSS */}
-        <style>{`
-          @media (min-width: 768px) {
-            .reader-scroll-area {
-              margin-left: ${navOpen ? '260px' : '0px'};
-              margin-right: ${notesOpen ? '260px' : '0px'};
-              transition: margin 300ms cubic-bezier(0.16, 1, 0.3, 1);
-            }
-          }
-        `}</style>
-        <div className="reader-scroll-area">
-          <ReadingArea
-            chapterLabel="Chapter 4"
-            chapterTitle="The Associative Machine"
-            paragraphs={PARAGRAPHS}
-            highlights={HIGHLIGHTS}
-            fontFamily={fontFamily}
-            fontSize={fontSize}
-            onHighlightTap={handleHighlightTap}
-          />
-        </div>
-      </div>
-
-      <BottomPanel
-        activePanel={activePanel}
-        onPanelChange={handlePanelChange}
-        barVisible={barVisible}
-        onBarDismiss={() => { setBarVisible(false); setActivePanel(null); }}
+      {/* Desktop sidebar */}
+      <DesktopSidebar
+        activeChapterIndex={activeChapter}
+        onChapterSelect={handleChapterSelect}
+        bookmarks={bookmarks}
+        onRemoveBookmark={handleRemoveBookmark}
         notes={notes}
         onSaveNote={handleSaveNote}
         pendingQuote={pendingQuote}
@@ -230,6 +160,51 @@ const ReaderScreen = () => {
         onFontSizeChange={setFontSize}
         onThemeChange={setTheme}
       />
+
+      {/* Mobile drawers */}
+      <MobileDrawer
+        activeChapterIndex={activeChapter}
+        onChapterSelect={handleChapterSelect}
+        bookmarks={bookmarks}
+        onRemoveBookmark={handleRemoveBookmark}
+      />
+
+      {/* Reading area */}
+      <div
+        className="flex-1 overflow-y-auto transition-[margin] duration-300 ease-out"
+        ref={scrollRef}
+        onClick={handleReadingAreaTap}
+      >
+        <ReadingArea
+          chapterLabel="Chapter 4"
+          chapterTitle="The Associative Machine"
+          paragraphs={PARAGRAPHS}
+          highlights={HIGHLIGHTS}
+          fontFamily={fontFamily}
+          fontSize={fontSize}
+          onHighlightTap={handleHighlightTap}
+        />
+      </div>
+
+      {/* Bottom panel — mobile only */}
+      <div className="md:hidden">
+        <BottomPanel
+          activePanel={activePanel}
+          onPanelChange={handlePanelChange}
+          barVisible={barVisible}
+          onBarDismiss={() => { setBarVisible(false); setActivePanel(null); }}
+          notes={notes}
+          onSaveNote={handleSaveNote}
+          pendingQuote={pendingQuote}
+          onClearPendingQuote={() => setPendingQuote('')}
+          fontFamily={fontFamily}
+          fontSize={fontSize}
+          theme={theme}
+          onFontFamilyChange={setFontFamily}
+          onFontSizeChange={setFontSize}
+          onThemeChange={setTheme}
+        />
+      </div>
     </div>
   );
 };
