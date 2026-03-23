@@ -1,15 +1,14 @@
-import { ArrowLeft, Menu, Bookmark } from 'lucide-react';
+import { ArrowLeft, Bookmark } from 'lucide-react';
 
 interface TopBarProps {
   title: string;
   progress: number;
   onBack: () => void;
-  onMenuOpen: () => void;
   onBookmark: () => void;
   isBookmarked?: boolean;
 }
 
-const TopBar = ({ title, progress, onBack, onMenuOpen, onBookmark, isBookmarked }: TopBarProps) => {
+const TopBar = ({ title, progress, onBack, onBookmark, isBookmarked }: TopBarProps) => {
   return (
     <div className="fixed top-0 left-0 right-0 z-30">
       <div className="h-[52px] bg-reader-surface border-b border-reader-border flex items-center px-3">
@@ -25,17 +24,12 @@ const TopBar = ({ title, progress, onBack, onMenuOpen, onBookmark, isBookmarked 
         </h1>
         <button
           onClick={onBookmark}
-          className="w-10 h-10 flex items-center justify-center rounded-lg text-reader-text active:scale-95 transition-transform"
-          aria-label="Bookmark this position"
+          className={`w-10 h-10 flex items-center justify-center rounded-lg active:scale-95 transition-all ${
+            isBookmarked ? 'text-reader-accent' : 'text-reader-text'
+          }`}
+          aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark this position'}
         >
           <Bookmark size={20} fill={isBookmarked ? 'currentColor' : 'none'} />
-        </button>
-        <button
-          onClick={onMenuOpen}
-          className="w-10 h-10 flex items-center justify-center rounded-lg text-reader-text active:scale-95 transition-transform"
-          aria-label="Table of contents"
-        >
-          <Menu size={22} />
         </button>
       </div>
       <div className="h-[2px] bg-reader-border">
