@@ -66,6 +66,12 @@ const ReaderScreen = () => {
   }, []);
 
   useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('theme-light', 'theme-sepia', 'theme-dark');
+    root.classList.add(`theme-${theme}`);
+  }, [theme]);
+
+  useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     el.addEventListener('scroll', handleScroll, { passive: true });
@@ -101,10 +107,8 @@ const ReaderScreen = () => {
     }
   }, []);
 
-  const themeClass = `theme-${theme}`;
-
   return (
-    <div className={`${themeClass} h-screen flex flex-col overflow-hidden bg-reader-bg`}>
+    <div className="h-screen flex flex-col overflow-hidden bg-reader-bg">
       <TopBar
         title="Thinking, Fast and Slow"
         progress={progress}
