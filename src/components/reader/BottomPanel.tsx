@@ -1,4 +1,4 @@
-import { Sun, FileText, Type } from 'lucide-react';
+import { Sun, FileText } from 'lucide-react';
 import AIChat from './AIChat';
 import NotesPanel, { type Note } from './NotesPanel';
 import TypographyPanel from './TypographyPanel';
@@ -8,6 +8,8 @@ type PanelType = 'ai' | 'notes' | 'typography' | null;
 interface BottomPanelProps {
   activePanel: PanelType;
   onPanelChange: (panel: PanelType) => void;
+  barVisible: boolean;
+  onBarDismiss: () => void;
   notes: Note[];
   onSaveNote: (note: Omit<Note, 'id' | 'timestamp'>) => void;
   pendingQuote: string;
@@ -23,6 +25,8 @@ interface BottomPanelProps {
 const BottomPanel = ({
   activePanel,
   onPanelChange,
+  barVisible,
+  onBarDismiss,
   notes,
   onSaveNote,
   pendingQuote,
@@ -36,19 +40,22 @@ const BottomPanel = ({
 }: BottomPanelProps) => {
   const isExpanded = activePanel !== null;
   const panelHeight = activePanel === 'typography' ? 'auto' : '60vh';
+  const isVisible = barVisible || isExpanded;
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay when panel expanded */}
       {isExpanded && (
         <div
           className="fixed inset-0 bg-black/20 z-30"
-          onClick={() => onPanelChange(null)}
+          onClick={onBarDismiss}
         />
       )}
 
       <div
-        className="fixed bottom-0 left-0 right-0 z-40 bg-reader-surface border-t border-reader-border transition-all duration-300 ease-out"
+        className={`fixed bottom-0 left-0 right-0 z-40 bg-reader-surface border-t border-reader-border transition-all duration-300 ease-out ${
+          isVisible ? 'translate-y-0' : 'translate-y-full'
+        }`}
         style={{ height: isExpanded ? panelHeight : '52px' }}
       >
         {/* Toolbar */}
