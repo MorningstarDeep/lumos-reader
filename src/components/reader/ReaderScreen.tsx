@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import TopBar from './TopBar';
 import ReadingArea from './ReadingArea';
 import BottomPanel from './BottomPanel';
+import NavigationPanel from './NavigationPanel';
 import type { Note } from './NotesPanel';
+import type { BookmarkEntry } from './NavigationPanel';
 
 const PARAGRAPHS = [
   `When you think of a mental image of a friend, that image comes to mind effortlessly and without intention. You did not will it into being and you could not prevent it. It was an act of System 1. The operations of associative memory contribute to a general confirmation bias, which favors uncritical acceptance of suggestions and exaggeration of the likelihood of extreme and improbable events.`,
@@ -41,6 +43,9 @@ const ReaderScreen = () => {
   const [fontFamily, setFontFamily] = useState('Lora');
   const [fontSize, setFontSize] = useState(18);
   const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('light');
+  const [navOpen, setNavOpen] = useState(false);
+  const [activeChapter, setActiveChapter] = useState(3); // "The Associative Machine"
+  const [bookmarks, setBookmarks] = useState<BookmarkEntry[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const lastScrollTopRef = useRef(0);
@@ -54,14 +59,12 @@ const ReaderScreen = () => {
       setProgress((scrollTop / scrollHeight) * 100);
     }
 
-    // Hide bar on scroll
     if (Math.abs(scrollTop - lastScrollTopRef.current) > 5) {
       setBarVisible(false);
       setActivePanel(null);
     }
     lastScrollTopRef.current = scrollTop;
 
-    // Clear any existing timeout
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current);
     }
@@ -81,7 +84,6 @@ const ReaderScreen = () => {
   }, [handleScroll]);
 
   const handleReadingAreaTap = useCallback((e: React.MouseEvent) => {
-    // Don't toggle if tapping a highlight or interactive element
     const target = e.target as HTMLElement;
     if (target.closest('[role="button"]') || target.closest('button')) return;
     setBarVisible((prev) => !prev);
@@ -104,18 +106,59 @@ const ReaderScreen = () => {
 
   const handlePanelChange = useCallback((panel: 'ai' | 'notes' | 'typography' | null) => {
     setActivePanel(panel);
-    if (panel === null) {
-      // Keep bar visible when closing panel
-    }
+  }, []);
+
+  const handleBookmark = useCallback(() => {
+    const chapterNames = [
+      'The Characters of the Story',
+      'Attention and Effort',
+      'The Lazy Controller',
+      'The Associative Machine',
+      'Cognitive Ease',
+      'Norms, Surprises, and Causes',
+      'A Machine for Jumping to Conclusions',
+      'How Judgments Happen',
+    ];
+
+    // Get a snippet of nearby visible text
+    const el = scrollRef.current;
+    const excerpt = el
+      ? PARAGRAPHS[Math.min(Math.floor((progress / 100) * PARAGRAPHS.length), PARAGRAPHS.length - 1)].slice(0, 80) + '…'
+      : '';
+
+    const entry: BookmarkEntry = {
+      id: Date.now().toString(),
+      chapter: chapterNames[activeChapter],
+      excerpt,
+    };
+    setBookmarks((prev) => [entry, ...prev]);
+  }, [progress, activeChapter]);
+
+  const handleRemoveBookmark = useCallback((id: string) => {
+    setBookmarks((prev) => prev.filter((b) => b.id !== id));
+  }, []);
+
+  const handleChapterSelect = useCallback((index: number) => {
+    setActiveChapter(index);
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-reader-bg">
+      <NavigationPanel
+        isOpen={navOpen}
+        onToggle={() => setNavOpen((p) => !p)}
+        activeChapterIndex={activeChapter}
+        onChapterSelect={handleChapterSelect}
+        bookmarks={bookmarks}
+        onRemoveBookmark={handleRemoveBookmark}
+      />
       <TopBar
         title="Thinking, Fast and Slow"
         progress={progress}
         onBack={() => navigate('/')}
-        onMenuOpen={() => {}}
+        onMenuOpen={() => setNavOpen((p) => !p)}
+        onBookmark={handleBookmark}
       />
       <div
         ref={scrollRef}
