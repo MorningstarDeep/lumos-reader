@@ -159,7 +159,7 @@ const ReaderScreen = () => {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-reader-bg">
+    <div ref={wrapperRef} className="h-screen flex flex-col overflow-hidden bg-reader-bg">
       <NavigationPanel
         isOpen={navOpen}
         onToggle={() => setNavOpen((p) => !p)}
