@@ -152,6 +152,7 @@ const ReaderScreen = () => {
       <SideNotesPanel
         isOpen={notesOpen}
         onToggle={() => setNotesOpen((p) => !p)}
+        activeChapter={activeChapter}
       />
       <TopBar
         title="Thinking, Fast and Slow"
