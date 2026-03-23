@@ -13,6 +13,12 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        serif: ['"DM Serif Display"', 'serif'],
+        body: ['"Lora"', 'serif'],
+        'crimson': ['"Crimson Pro"', 'serif'],
+        'source': ['"Source Serif 4"', 'serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -56,6 +62,17 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+        },
+        reader: {
+          bg: "hsl(var(--reader-bg))",
+          text: "hsl(var(--reader-text))",
+          accent: "hsl(var(--reader-accent))",
+          surface: "hsl(var(--reader-surface))",
+          border: "hsl(var(--reader-border))",
+          muted: "hsl(var(--reader-muted))",
+          highlight: "hsl(var(--reader-highlight))",
+          "user-msg": "hsl(var(--reader-user-msg))",
+          "ai-msg": "hsl(var(--reader-ai-msg))",
         },
       },
       borderRadius: {
