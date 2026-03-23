@@ -32,6 +32,7 @@ const HIGHLIGHTS = [
 ];
 
 const ReaderScreen = () => {
+  const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
   const [activePanel, setActivePanel] = useState<'ai' | 'notes' | 'typography' | null>(null);
   const [barVisible, setBarVisible] = useState(false);
