@@ -47,15 +47,15 @@ const NavigationPanel = ({
         />
       )}
 
-      {/* Handle tab — always visible */}
+      {/* Desktop handle tab — hidden on mobile */}
       <button
         onClick={onToggle}
-        className="fixed top-1/2 -translate-y-1/2 z-50 flex items-center justify-center bg-reader-surface border border-reader-border text-reader-muted hover:text-reader-text transition-all duration-300 active:scale-95"
+        className="hidden md:flex fixed top-1/2 -translate-y-1/2 z-50 items-center justify-center bg-reader-surface border border-reader-border text-reader-muted hover:text-reader-text transition-all duration-300 active:scale-95"
         style={{
           left: isOpen ? 260 : 0,
-          width: 24,
-          height: 48,
-          borderRadius: '0 24px 24px 0',
+          width: 20,
+          height: 64,
+          borderRadius: '0 32px 32px 0',
           borderLeft: 'none',
           transition: 'left 300ms cubic-bezier(0.16,1,0.3,1)',
         }}
