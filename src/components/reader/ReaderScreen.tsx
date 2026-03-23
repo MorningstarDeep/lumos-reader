@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TopBar from './TopBar';
 import ReadingArea from './ReadingArea';
 import BottomPanel from './BottomPanel';
@@ -31,6 +32,7 @@ const HIGHLIGHTS = [
 ];
 
 const ReaderScreen = () => {
+  const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
   const [activePanel, setActivePanel] = useState<'ai' | 'notes' | 'typography' | null>(null);
   const [barVisible, setBarVisible] = useState(false);
@@ -112,7 +114,7 @@ const ReaderScreen = () => {
       <TopBar
         title="Thinking, Fast and Slow"
         progress={progress}
-        onBack={() => {}}
+        onBack={() => navigate('/')}
         onMenuOpen={() => {}}
       />
       <div
