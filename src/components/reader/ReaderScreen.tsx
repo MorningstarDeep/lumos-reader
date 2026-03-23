@@ -114,7 +114,7 @@ const ReaderScreen = () => {
       <TopBar
         title="Thinking, Fast and Slow"
         progress={progress}
-        onBack={() => {}}
+        onBack={() => navigate('/')}
         onMenuOpen={() => {}}
       />
       <div
