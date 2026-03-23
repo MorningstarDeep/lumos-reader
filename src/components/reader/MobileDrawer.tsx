@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronRight, ChevronLeft, List, Bookmark, X } from 'lucide-react';
+import { List, Bookmark, X } from 'lucide-react';
 import type { BookmarkEntry } from './NavigationPanel';
 
 const CHAPTERS = [
@@ -55,35 +55,31 @@ const MobileDrawer = ({
 
   return (
     <div className="md:hidden">
-      {/* Left edge pill button */}
+      {/* Left edge notch */}
       <button
         onClick={() => setLeftOpen(true)}
-        className="fixed left-0 top-1/2 -translate-y-1/2 z-30 flex items-center justify-center bg-reader-surface border border-reader-border border-l-0 text-reader-muted active:scale-95 transition-transform"
+        className="fixed left-0 top-1/2 -translate-y-1/2 z-30 bg-reader-border active:scale-95 transition-transform"
         style={{
-          width: 20,
-          height: 56,
-          borderRadius: '0 28px 28px 0',
+          width: 7,
+          height: 52,
+          borderRadius: '0 4px 4px 0',
         }}
         aria-label="Open navigation"
-      >
-        <ChevronRight size={14} />
-      </button>
+      />
 
-      {/* Right edge pill button */}
+      {/* Right edge notch */}
       <button
         onClick={() => setRightOpen(true)}
-        className="fixed right-0 top-1/2 -translate-y-1/2 z-30 flex items-center justify-center bg-reader-surface border border-reader-border border-r-0 text-reader-muted active:scale-95 transition-transform"
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-30 bg-reader-border active:scale-95 transition-transform"
         style={{
-          width: 20,
-          height: 56,
-          borderRadius: '28px 0 0 28px',
-          boxShadow: showHint ? '0 0 12px 4px hsla(25, 73%, 31%, 0.35)' : 'none',
+          width: 7,
+          height: 52,
+          borderRadius: '4px 0 0 4px',
+          boxShadow: showHint ? '0 0 10px 3px hsla(25, 73%, 31%, 0.3)' : 'none',
           transition: 'box-shadow 300ms ease',
         }}
         aria-label="Open side notes"
-      >
-        <ChevronLeft size={14} />
-      </button>
+      />
 
       {/* Left drawer overlay */}
       {leftOpen && (

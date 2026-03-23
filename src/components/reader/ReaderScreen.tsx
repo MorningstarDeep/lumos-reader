@@ -171,7 +171,7 @@ const ReaderScreen = () => {
 
       {/* Reading area */}
       <div
-        className="flex-1 overflow-y-auto transition-[margin] duration-300 ease-out"
+        className="flex-1 overflow-y-auto transition-[margin] duration-300 ease-out md:mr-14"
         ref={scrollRef}
         onClick={handleReadingAreaTap}
       >
