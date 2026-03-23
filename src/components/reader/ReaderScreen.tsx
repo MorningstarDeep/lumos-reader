@@ -50,7 +50,25 @@ const ReaderScreen = () => {
   const [activeChapter, setActiveChapter] = useState(3);
   const [bookmarks, setBookmarks] = useState<BookmarkEntry[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const lastScrollTopRef = useRef(0);
+
+  // Mobile swipe gestures
+  useEdgeSwipe({
+    elementRef: wrapperRef,
+    edge: 'left',
+    isOpen: navOpen,
+    onSwipeOpen: () => setNavOpen(true),
+    onSwipeClose: () => setNavOpen(false),
+  });
+
+  useEdgeSwipe({
+    elementRef: wrapperRef,
+    edge: 'right',
+    isOpen: notesOpen,
+    onSwipeOpen: () => setNotesOpen(true),
+    onSwipeClose: () => setNotesOpen(false),
+  });
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
