@@ -66,6 +66,12 @@ const ReaderScreen = () => {
   }, []);
 
   useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('theme-light', 'theme-sepia', 'theme-dark');
+    root.classList.add(`theme-${theme}`);
+  }, [theme]);
+
+  useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     el.addEventListener('scroll', handleScroll, { passive: true });
