@@ -7,6 +7,7 @@ import NavigationPanel from './NavigationPanel';
 import SideNotesPanel from './SideNotesPanel';
 import type { Note } from './NotesPanel';
 import type { BookmarkEntry } from './NavigationPanel';
+import { useEdgeSwipe } from '@/hooks/use-swipe';
 
 const PARAGRAPHS = [
   `When you think of a mental image of a friend, that image comes to mind effortlessly and without intention. You did not will it into being and you could not prevent it. It was an act of System 1. The operations of associative memory contribute to a general confirmation bias, which favors uncritical acceptance of suggestions and exaggeration of the likelihood of extreme and improbable events.`,
