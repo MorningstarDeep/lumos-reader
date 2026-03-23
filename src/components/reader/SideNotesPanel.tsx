@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SideNotesPanelProps {
   isOpen: boolean;
   onToggle: () => void;
+  activeChapter: number;
 }
 
 const SIDE_NOTES = [
@@ -11,7 +13,26 @@ const SIDE_NOTES = [
   'Priming first described by Meyer & Schvaneveldt, 1971',
 ];
 
-const SideNotesPanel = ({ isOpen, onToggle }: SideNotesPanelProps) => {
+const SideNotesPanel = ({ isOpen, onToggle, activeChapter }: SideNotesPanelProps) => {
+  const [showHint, setShowHint] = useState(false);
+  const [seenChapters, setSeenChapters] = useState<Set<number>>(new Set());
+
+  // Amber pulse hint when chapter changes (if not already seen)
+  useEffect(() => {
+    if (seenChapters.has(activeChapter)) return;
+    setShowHint(true);
+    const timer = setTimeout(() => setShowHint(false), 1500);
+    return () => clearTimeout(timer);
+  }, [activeChapter]);
+
+  // Mark chapter as seen when panel is opened
+  useEffect(() => {
+    if (isOpen) {
+      setSeenChapters((prev) => new Set(prev).add(activeChapter));
+      setShowHint(false);
+    }
+  }, [isOpen, activeChapter]);
+
   return (
     <>
       {/* Mobile overlay */}
@@ -22,17 +43,30 @@ const SideNotesPanel = ({ isOpen, onToggle }: SideNotesPanelProps) => {
         />
       )}
 
-      {/* Handle tab — always visible */}
+      {/* Mobile hint dot — right edge */}
+      {showHint && (
+        <div
+          className="md:hidden fixed top-1/2 -translate-y-1/2 z-30 pointer-events-none"
+          style={{ right: 4 }}
+        >
+          <span className="block w-2.5 h-2.5 rounded-full bg-reader-accent animate-[sidenotePulse_1.5s_ease-out_forwards]" />
+        </div>
+      )}
+
+      {/* Desktop handle tab — hidden on mobile */}
       <button
         onClick={onToggle}
-        className="fixed top-1/2 -translate-y-1/2 z-50 flex items-center justify-center bg-reader-surface border border-reader-border text-reader-muted hover:text-reader-text transition-all duration-300 active:scale-95"
+        className="hidden md:flex fixed top-1/2 -translate-y-1/2 z-50 items-center justify-center bg-reader-surface border border-reader-border text-reader-muted hover:text-reader-text transition-all duration-300 active:scale-95"
         style={{
           right: isOpen ? 260 : 0,
-          width: 24,
-          height: 48,
-          borderRadius: '24px 0 0 24px',
+          width: 20,
+          height: 64,
+          borderRadius: '32px 0 0 32px',
           borderRight: 'none',
           transition: 'right 300ms cubic-bezier(0.16,1,0.3,1)',
+          boxShadow: showHint
+            ? '0 0 12px 4px hsla(25, 73%, 31%, 0.35)'
+            : 'none',
         }}
         aria-label={isOpen ? 'Close side notes' : 'Open side notes'}
       >

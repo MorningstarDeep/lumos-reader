@@ -7,6 +7,7 @@ import NavigationPanel from './NavigationPanel';
 import SideNotesPanel from './SideNotesPanel';
 import type { Note } from './NotesPanel';
 import type { BookmarkEntry } from './NavigationPanel';
+import { useEdgeSwipe } from '@/hooks/use-swipe';
 
 const PARAGRAPHS = [
   `When you think of a mental image of a friend, that image comes to mind effortlessly and without intention. You did not will it into being and you could not prevent it. It was an act of System 1. The operations of associative memory contribute to a general confirmation bias, which favors uncritical acceptance of suggestions and exaggeration of the likelihood of extreme and improbable events.`,
@@ -49,7 +50,25 @@ const ReaderScreen = () => {
   const [activeChapter, setActiveChapter] = useState(3);
   const [bookmarks, setBookmarks] = useState<BookmarkEntry[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const lastScrollTopRef = useRef(0);
+
+  // Mobile swipe gestures
+  useEdgeSwipe({
+    elementRef: wrapperRef,
+    edge: 'left',
+    isOpen: navOpen,
+    onSwipeOpen: () => setNavOpen(true),
+    onSwipeClose: () => setNavOpen(false),
+  });
+
+  useEdgeSwipe({
+    elementRef: wrapperRef,
+    edge: 'right',
+    isOpen: notesOpen,
+    onSwipeOpen: () => setNotesOpen(true),
+    onSwipeClose: () => setNotesOpen(false),
+  });
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -140,7 +159,7 @@ const ReaderScreen = () => {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-reader-bg">
+    <div ref={wrapperRef} className="h-screen flex flex-col overflow-hidden bg-reader-bg">
       <NavigationPanel
         isOpen={navOpen}
         onToggle={() => setNavOpen((p) => !p)}
@@ -152,6 +171,7 @@ const ReaderScreen = () => {
       <SideNotesPanel
         isOpen={notesOpen}
         onToggle={() => setNotesOpen((p) => !p)}
+        activeChapter={activeChapter}
       />
       <TopBar
         title="Thinking, Fast and Slow"
