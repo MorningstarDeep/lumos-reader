@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { List, Bookmark, X } from 'lucide-react';
+import { List, Bookmark, X, ChevronRight, ChevronLeft } from 'lucide-react';
 
 export interface BookmarkEntry {
   id: string;
@@ -39,26 +39,41 @@ const NavigationPanel = ({
 
   return (
     <>
-      {/* Toggle tab — always visible on md+ */}
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/20 z-40"
+          onClick={onToggle}
+        />
+      )}
+
+      {/* Handle tab — always visible */}
       <button
         onClick={onToggle}
-        className="hidden md:flex fixed left-0 top-1/2 -translate-y-1/2 z-40 w-7 h-14 items-center justify-center rounded-r-lg bg-reader-surface border border-l-0 border-reader-border shadow-sm text-reader-muted hover:text-reader-text transition-colors active:scale-95"
-        style={{ left: isOpen ? 260 : 0, transition: 'left 300ms cubic-bezier(0.16,1,0.3,1)' }}
+        className="fixed top-1/2 -translate-y-1/2 z-50 flex items-center justify-center bg-reader-surface border border-reader-border text-reader-muted hover:text-reader-text transition-all duration-300 active:scale-95"
+        style={{
+          left: isOpen ? 260 : 0,
+          width: 24,
+          height: 48,
+          borderRadius: '0 24px 24px 0',
+          borderLeft: 'none',
+          transition: 'left 300ms cubic-bezier(0.16,1,0.3,1)',
+        }}
         aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
       >
-        <List size={16} />
+        {isOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
       </button>
 
       {/* Panel */}
       <div
-        className="hidden md:flex fixed top-0 left-0 bottom-0 z-30 w-[260px] flex-col bg-reader-surface border-r border-reader-border shadow-lg"
+        className="fixed top-0 left-0 bottom-0 z-40 w-[260px] flex flex-col bg-reader-surface border-r border-reader-border shadow-lg"
         style={{
           transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform 300ms cubic-bezier(0.16,1,0.3,1)',
         }}
       >
         {/* Tabs */}
-        <div className="flex border-b border-reader-border">
+        <div className="flex border-b border-reader-border shrink-0">
           <button
             onClick={() => setActiveTab('contents')}
             className={`flex-1 h-12 flex items-center justify-center gap-1.5 text-sm font-medium transition-colors ${

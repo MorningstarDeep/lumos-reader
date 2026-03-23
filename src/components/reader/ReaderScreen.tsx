@@ -4,6 +4,7 @@ import TopBar from './TopBar';
 import ReadingArea from './ReadingArea';
 import BottomPanel from './BottomPanel';
 import NavigationPanel from './NavigationPanel';
+import SideNotesPanel from './SideNotesPanel';
 import type { Note } from './NotesPanel';
 import type { BookmarkEntry } from './NavigationPanel';
 
@@ -44,10 +45,10 @@ const ReaderScreen = () => {
   const [fontSize, setFontSize] = useState(18);
   const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('light');
   const [navOpen, setNavOpen] = useState(false);
-  const [activeChapter, setActiveChapter] = useState(3); // "The Associative Machine"
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [activeChapter, setActiveChapter] = useState(3);
   const [bookmarks, setBookmarks] = useState<BookmarkEntry[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const lastScrollTopRef = useRef(0);
 
   const handleScroll = useCallback(() => {
@@ -64,10 +65,6 @@ const ReaderScreen = () => {
       setActivePanel(null);
     }
     lastScrollTopRef.current = scrollTop;
-
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
   }, []);
 
   useEffect(() => {
@@ -108,19 +105,18 @@ const ReaderScreen = () => {
     setActivePanel(panel);
   }, []);
 
-  const handleBookmark = useCallback(() => {
-    const chapterNames = [
-      'The Characters of the Story',
-      'Attention and Effort',
-      'The Lazy Controller',
-      'The Associative Machine',
-      'Cognitive Ease',
-      'Norms, Surprises, and Causes',
-      'A Machine for Jumping to Conclusions',
-      'How Judgments Happen',
-    ];
+  const chapterNames = [
+    'The Characters of the Story',
+    'Attention and Effort',
+    'The Lazy Controller',
+    'The Associative Machine',
+    'Cognitive Ease',
+    'Norms, Surprises, and Causes',
+    'A Machine for Jumping to Conclusions',
+    'How Judgments Happen',
+  ];
 
-    // Get a snippet of nearby visible text
+  const handleBookmark = useCallback(() => {
     const el = scrollRef.current;
     const excerpt = el
       ? PARAGRAPHS[Math.min(Math.floor((progress / 100) * PARAGRAPHS.length), PARAGRAPHS.length - 1)].slice(0, 80) + '…'
@@ -153,6 +149,10 @@ const ReaderScreen = () => {
         bookmarks={bookmarks}
         onRemoveBookmark={handleRemoveBookmark}
       />
+      <SideNotesPanel
+        isOpen={notesOpen}
+        onToggle={() => setNotesOpen((p) => !p)}
+      />
       <TopBar
         title="Thinking, Fast and Slow"
         progress={progress}
@@ -160,21 +160,40 @@ const ReaderScreen = () => {
         onMenuOpen={() => setNavOpen((p) => !p)}
         onBookmark={handleBookmark}
       />
+
+      {/* Reading area — pushed by panels on desktop */}
       <div
+        className="flex-1 overflow-y-auto transition-[margin] duration-300 ease-out"
         ref={scrollRef}
-        className="flex-1 overflow-y-auto"
         onClick={handleReadingAreaTap}
+        style={{
+          marginLeft: undefined,
+          marginRight: undefined,
+        }}
       >
-        <ReadingArea
-          chapterLabel="Chapter 4"
-          chapterTitle="The Associative Machine"
-          paragraphs={PARAGRAPHS}
-          highlights={HIGHLIGHTS}
-          fontFamily={fontFamily}
-          fontSize={fontSize}
-          onHighlightTap={handleHighlightTap}
-        />
+        {/* Desktop margin push via CSS */}
+        <style>{`
+          @media (min-width: 768px) {
+            .reader-scroll-area {
+              margin-left: ${navOpen ? '260px' : '0px'};
+              margin-right: ${notesOpen ? '260px' : '0px'};
+              transition: margin 300ms cubic-bezier(0.16, 1, 0.3, 1);
+            }
+          }
+        `}</style>
+        <div className="reader-scroll-area">
+          <ReadingArea
+            chapterLabel="Chapter 4"
+            chapterTitle="The Associative Machine"
+            paragraphs={PARAGRAPHS}
+            highlights={HIGHLIGHTS}
+            fontFamily={fontFamily}
+            fontSize={fontSize}
+            onHighlightTap={handleHighlightTap}
+          />
+        </div>
       </div>
+
       <BottomPanel
         activePanel={activePanel}
         onPanelChange={handlePanelChange}
