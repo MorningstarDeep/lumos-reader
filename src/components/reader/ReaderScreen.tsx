@@ -33,12 +33,15 @@ const HIGHLIGHTS = [
 const ReaderScreen = () => {
   const [progress, setProgress] = useState(0);
   const [activePanel, setActivePanel] = useState<'ai' | 'notes' | 'typography' | null>(null);
+  const [barVisible, setBarVisible] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [pendingQuote, setPendingQuote] = useState('');
   const [fontFamily, setFontFamily] = useState('Lora');
   const [fontSize, setFontSize] = useState(18);
   const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('light');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const lastScrollTopRef = useRef(0);
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -47,6 +50,18 @@ const ReaderScreen = () => {
     const scrollHeight = el.scrollHeight - el.clientHeight;
     if (scrollHeight > 0) {
       setProgress((scrollTop / scrollHeight) * 100);
+    }
+
+    // Hide bar on scroll
+    if (Math.abs(scrollTop - lastScrollTopRef.current) > 5) {
+      setBarVisible(false);
+      setActivePanel(null);
+    }
+    lastScrollTopRef.current = scrollTop;
+
+    // Clear any existing timeout
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
     }
   }, []);
 
@@ -57,8 +72,16 @@ const ReaderScreen = () => {
     return () => el.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
+  const handleReadingAreaTap = useCallback((e: React.MouseEvent) => {
+    // Don't toggle if tapping a highlight or interactive element
+    const target = e.target as HTMLElement;
+    if (target.closest('[role="button"]') || target.closest('button')) return;
+    setBarVisible((prev) => !prev);
+  }, []);
+
   const handleHighlightTap = (highlight: { text: string }) => {
     setPendingQuote(highlight.text);
+    setBarVisible(true);
     setActivePanel('notes');
   };
 
@@ -71,17 +94,28 @@ const ReaderScreen = () => {
     setNotes((prev) => [newNote, ...prev]);
   };
 
+  const handlePanelChange = useCallback((panel: 'ai' | 'notes' | 'typography' | null) => {
+    setActivePanel(panel);
+    if (panel === null) {
+      // Keep bar visible when closing panel
+    }
+  }, []);
+
   const themeClass = `theme-${theme}`;
 
   return (
-    <div className={`${themeClass} h-screen flex flex-col overflow-hidden`}>
+    <div className={`${themeClass} h-screen flex flex-col overflow-hidden bg-reader-bg`}>
       <TopBar
         title="Thinking, Fast and Slow"
         progress={progress}
         onBack={() => {}}
         onMenuOpen={() => {}}
       />
-      <div ref={scrollRef} className="flex-1 overflow-y-auto">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto"
+        onClick={handleReadingAreaTap}
+      >
         <ReadingArea
           chapterLabel="Chapter 4"
           chapterTitle="The Associative Machine"
@@ -94,7 +128,9 @@ const ReaderScreen = () => {
       </div>
       <BottomPanel
         activePanel={activePanel}
-        onPanelChange={setActivePanel}
+        onPanelChange={handlePanelChange}
+        barVisible={barVisible}
+        onBarDismiss={() => { setBarVisible(false); setActivePanel(null); }}
         notes={notes}
         onSaveNote={handleSaveNote}
         pendingQuote={pendingQuote}
