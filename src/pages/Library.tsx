@@ -41,12 +41,14 @@ const BookCard = ({ book, onClick }: { book: Book; onClick: () => void }) => {
   if (book.isLoading) {
     return (
       <div className="rounded-xl border border-reader-border bg-reader-surface shadow-sm overflow-hidden">
-        <div className="aspect-[3/4] relative">
+        <div className="h-48">
           <Skeleton className="w-full h-full rounded-none bg-reader-border" />
         </div>
-        <div className="p-3 space-y-2">
+        <div className="h-24 p-3 flex flex-col justify-between">
           <Skeleton className="h-4 w-3/4 bg-reader-border" />
           <Skeleton className="h-3 w-1/2 bg-reader-border" />
+          <Skeleton className="h-1 w-full bg-reader-border rounded-full" />
+          <Skeleton className="h-3 w-1/3 bg-reader-border" />
         </div>
       </div>
     );
@@ -57,12 +59,12 @@ const BookCard = ({ book, onClick }: { book: Book; onClick: () => void }) => {
       onClick={onClick}
       className="rounded-xl border border-reader-border bg-reader-surface shadow-sm overflow-hidden text-left w-full active:scale-[0.97] transition-transform duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-reader-accent focus-visible:ring-offset-2"
     >
-      <div className={`aspect-[3/4] bg-gradient-to-br ${book.coverGradient} relative flex items-end p-4`}>
+      <div className={`h-48 bg-gradient-to-br ${book.coverGradient} relative flex items-end p-4`}>
         <h3 className="font-serif text-white text-lg leading-snug drop-shadow-md" style={{ lineHeight: '1.25' }}>
           {book.title}
         </h3>
       </div>
-      <div className="p-3 space-y-1.5">
+      <div className="h-24 p-3 flex flex-col justify-between">
         <p className="text-sm text-reader-muted truncate">{book.author}</p>
         <div className="h-1 bg-reader-border rounded-full overflow-hidden">
           <div
@@ -70,9 +72,9 @@ const BookCard = ({ book, onClick }: { book: Book; onClick: () => void }) => {
             style={{ width: `${book.progress}%` }}
           />
         </div>
-        {book.progress > 0 && (
-          <p className="text-xs text-reader-muted">{book.progress}% read</p>
-        )}
+        <p className="text-xs text-reader-muted">
+          {book.progress > 0 ? `${book.progress}% read` : 'Not started'}
+        </p>
       </div>
     </button>
   );
