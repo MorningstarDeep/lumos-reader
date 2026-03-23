@@ -87,3 +87,26 @@
   padding-top: 4px;
   color: hsl(var(--reader-accent));
 }
+
+@keyframes sidenotePulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+    box-shadow: 0 0 0 0 hsla(25, 73%, 31%, 0.5);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 8px 4px hsla(25, 73%, 31%, 0.3);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 12px 6px hsla(25, 73%, 31%, 0.15);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+    box-shadow: 0 0 0 0 hsla(25, 73%, 31%, 0);
+  }
+}
